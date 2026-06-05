@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuerPlantar - Login</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex">
+
+    <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-800 via-emerald-900 to-teal-950 p-12 flex-col justify-between relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.1),transparent_50%)]"></div>
+        
+        <div class="flex items-center gap-2 relative z-10"></div>
+
+        <div class="max-w-md relative z-10">
+            <h1 class="text-5xl font-black text-white leading-tight mb-4">
+                Monitore sua horta na velocidade do clique.
+            </h1>
+            <p class="text-emerald-100/80 text-lg">
+                Gerencie sensores, acompanhe gráficos e mantenha suas plantas saudáveis em um só lugar.
+            </p>
+        </div>
+
+        <div class="text-xs text-emerald-400/60 relative z-10">
+            &copy; 2026 QuerPlantar. Todos os direitos reservados.
+        </div>
+    </div>
+
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white">
+        <div class="w-full max-w-md">
+            
+            <div class="text-center lg:text-left mb-10">
+                <h2 class="text-4xl font-black text-slate-900 tracking-tight">
+                    Quer<span class="text-emerald-600">Plantar</span>
+                </h2>
+                <p class="text-sm text-slate-400 mt-2">Bem-vindo de volta! Por favor, insira seus dados.</p>
+            </div>
+
+            <form id="loginForm" class="space-y-5">
+                
+                <div>
+                    <label for="username" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Usuário</label>
+                    <div class="relative">
+                        <input type="text" id="username" required
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-4 py-3.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm"
+                            placeholder="exemplo">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="password" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Senha</label>
+                    <div class="relative">
+                        <input type="password" id="password" required
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-4 py-3.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm"
+                            placeholder="••••••••••••">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between text-xs pt-1">
+                    <a href="#" class="text-slate-400 hover:text-emerald-600 transition-colors">
+                        Esqueceu a senha?
+                    </a>
+                    <a href="#" class="font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+                        Não tem conta? Cadastre-se
+                    </a>
+                </div>
+
+                <div id="errorMessage" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 p-3 rounded-xl text-center font-medium">
+                    ⚠️ Usuário ou senha incorretos. Tente novamente.
+                </div>
+
+                <div class="flex justify-center pt-4">
+                    <button type="submit"
+                        class="px-10 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-semibold rounded-xl transition-all shadow-lg shadow-emerald-600/20 cursor-pointer text-sm tracking-wide">
+                        Entrar no Sistema
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const usernameInput = document.getElementById('username').value;
+            const passwordInput = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            
+            errorMessage.classList.add('hidden');
+            
+            const corpoRequisicao = new URLSearchParams();
+            corpoRequisicao.append('username', usernameInput);
+            corpoRequisicao.append('password', passwordInput);
+            
+            try {
+                const resposta = await fetch('http://127.0.0.1:8000/auth/token', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: corpoRequisicao
+                });
+                
+                if (!resposta.ok) {
+                    throw new Error('Credenciais inválidas');
+                }
+                
+                const dados = await resposta.json();
+                
+                localStorage.setItem('access_token', dados.access_token);
+                localStorage.setItem('usuario_logado', usernameInput);
+                
+                window.location.href = 'home.html';
+                
+            } catch (erro) {
+                errorMessage.classList.remove('hidden');
+                console.error('Erro ao tentar fazer login:', erro);
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuerPlantar - Painel</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col font-sans">
+
+    <header class="bg-emerald-700 text-white px-6 py-3 flex items-center justify-between shadow-md shrink-0">
+        <div class="flex items-center gap-6">
+            <h1 class="text-xl font-black tracking-tight flex items-center gap-2">
+                <span>🌿</span> Quer<span class="text-emerald-200">Plantar</span>
+            </h1>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <span id="nomeUsuario" class="text-sm font-medium text-emerald-100">...</span>
+            <button id="btnSair" class="text-xs bg-emerald-800 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg transition-colors cursor-pointer font-semibold">
+                Sair
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 p-6 flex gap-6 overflow-x-auto items-start align-top select-none">
+
+        <div class="w-85 bg-slate-200/80 shrink-0 p-4 rounded-2xl flex flex-col gap-3 max-h-[calc(100vh-120px)] shadow-sm">
+            <div class="flex items-center justify-between px-1">
+                <h3 class="font-bold text-slate-700 text-sm tracking-wide flex items-center gap-2">
+                    Canteiros Ativos <span id="contadorHortas" class="text-xs bg-slate-300 text-slate-600 px-2 py-0.5 rounded-full">0</span>
+                </h3>
+            </div>
+            
+            <div id="listaHortas" class="flex flex-col gap-3 overflow-y-auto pr-1">
+                <p class="text-xs text-slate-400 text-center py-4">Buscando canteiros...</p>
+            </div>
+        </div>
+
+        <div class="w-80 bg-slate-200/80 shrink-0 p-4 rounded-2xl flex flex-col gap-3 max-h-[calc(100vh-120px)] shadow-sm">
+            <h3 class="font-bold text-slate-700 text-sm tracking-wide px-1">📢 Diagnóstico da IA</h3>
+            
+            <div class="flex flex-col gap-2 overflow-y-auto">
+                <div class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-300/40 border-l-4 border-l-amber-500">
+                    <p class="text-xs font-bold text-slate-700">Atenção na Irrigação</p>
+                    <p class="text-xs text-slate-500 mt-1">O solo do Canteiro Alfa caiu abaixo de 40% nas últimas 2 hours.</p>
+                </div>
+                <div class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-300/40 border-l-4 border-l-emerald-500">
+                    <p class="text-xs font-bold text-slate-700">Luminosidade Ideal</p>
+                    <p class="text-xs text-slate-500 mt-1">Todas as hortas atingiram a cota de luz solar recomendada para hoje.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="w-80 bg-slate-200/80 shrink-0 p-4 rounded-2xl flex flex-col gap-3 shadow-sm">
+            <h3 class="font-bold text-slate-700 text-sm tracking-wide px-1">🛠️ Ações Rápidas</h3>
+            
+            <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-300/40">
+                <h4 class="text-xs font-bold text-slate-700 mb-3 uppercase tracking-wider text-emerald-600">Novo Canteiro</h4>
+                <form id="novaHortaForm" class="space-y-3">
+                    <label class="font-bold text-slate-700 text-xs tracking-wide px-1">Nome</label>
+                    <input type="text" id="nomeHorta" required placeholder="Ex: Horta da Cozinha"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors">
+                    
+                    <label class="font-bold text-slate-700 text-xs tracking-wide px-1">Descrição</label>
+                    <input type="text" id="descricaoHorta" placeholder="Ex: Temperos / Hortaliças"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors">
+                    
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg text-xs transition-colors cursor-pointer text-center">
+                        ➕ Adicionar à Lista
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="modalGrafico" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-3xl rounded-2xl p-6 shadow-2xl border border-slate-200 flex flex-col gap-4">
+            
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <h3 id="modalTituloHorta" class="text-lg font-bold text-slate-800">Gráficos do Canteiro</h3>
+                    <p class="text-xs text-slate-400">Histórico de telemetria das últimas leituras</p>
+                </div>
+                <button onclick="fecharModal()" class="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 p-2 rounded-xl transition-colors cursor-pointer text-sm font-bold">
+                    ✕ Fechar
+                </button>
+            </div>
+
+            <div class="relative w-full h-80">
+                <canvas id="meuGrafico"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('access_token');
+        const usuario = localStorage.getItem('usuario_logado');
+        let graficoInstancia = null;
+
+        if (!token) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('nomeUsuario').innerText = `👤 ${usuario}`;
+        }
+
+        async function carregarHortas() {
+            try {
+                const resposta = await fetch('http://127.0.0.1:8000/horta/', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (!resposta.ok) throw new Error('Erro ao buscar hortas');
+                
+                const hortas = await resposta.json();
+                const container = document.getElementById('listaHortas');
+                document.getElementById('contadorHortas').innerText = hortas.length;
+                
+                if (hortas.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Nenhum canteiro por aqui ainda.</p>`;
+                    return;
+                }
+
+                container.innerHTML = '';
+                hortas.forEach(horta => {
+                    container.innerHTML += `
+                        <div onclick="abrirGrafico(${horta.id}, '${horta.nome}')" class="bg-white p-4 rounded-xl shadow-xs border border-slate-200 hover:border-emerald-500/40 hover:shadow-md transition-all cursor-pointer group">
+                            <div class="flex items-start justify-between">
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm group-hover:text-emerald-700 transition-colors">${horta.nome}</h4>
+                                    <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded-md font-medium mt-1 inline-block">
+                                        ${horta.categoria || 'Geral'}
+                                    </span>
+                                </div>
+                                <span class="text-slate-300 group-hover:text-emerald-500 transition-colors">➔</span>
+                            </div>
+                            <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+                                <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Conectado</span>
+                                <span class="text-emerald-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Ver Gráficos</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (erro) {
+                console.error(erro);
+                document.getElementById('listaHortas').innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao carregar dados.</p>`;
+            }
+        }
+
+        async function abrirGrafico(hortaId, hortaNome) {
+            document.getElementById('modalTituloHorta').innerText = `🌿 ${hortaNome}`;
+            document.getElementById('modalGrafico').classList.remove('hidden');
+
+            try {
+                const resposta = await fetch(`http://127.0.0.1:8000/telemetria/${hortaId}?limite=10`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!resposta.ok) throw new Error('Erro ao buscar telemetria');
+                const dados = await resposta.json();
+
+                const rotulos = dados.map(d => new Date(d.data_hora).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})).reverse();
+                const temperaturas = dados.map(d => d.temperatura).reverse();
+                const umidades = dados.map(d => d.umidade).reverse();
+
+                if (graficoInstancia) graficoInstancia.destroy();
+
+                const ctx = document.getElementById('meuGrafico').getContext('2d');
+                graficoInstancia = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: rotulos,
+                        datasets: [
+                            {
+                                label: 'Temperatura (°C)',
+                                data: temperaturas,
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Umidade do Solo (%)',
+                                data: umidades,
+                                borderColor: '#0ea5e9',
+                                backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                                tension: 0.3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+
+            } catch (erro) {
+                console.error('Erro ao renderizar gráfico:', erro);
+            }
+        }
+
+        function fecharModal() {
+            document.getElementById('modalGrafico').classList.add('hidden');
+        }
+
+        // Criação de Horta (Sincronizado com o ID "descricaoHorta")
+        document.getElementById('novaHortaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('nomeHorta').value;
+            // CORREÇÃO: Capturando o valor usando o ID correto que está no HTML
+            const category = document.getElementById('descricaoHorta').value; 
+
+            try {
+                const resposta = await fetch('http://127.0.0.1:8000/horta/', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ nome: nome, categoria: category }) 
+                });
+
+                if (resposta.ok) {
+                    document.getElementById('novaHortaForm').reset();
+                    carregarHortas(); 
+                }
+            } catch (erro) {
+                console.error('Erro ao criar horta:', erro);
+            }
+        });
+
+        document.getElementById('btnSair').addEventListener('click', () => {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        });
+
+        carregarHortas();
+    </script>
+</body>
+</html>
