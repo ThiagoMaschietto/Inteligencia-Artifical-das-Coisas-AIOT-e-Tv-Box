@@ -49,3 +49,13 @@ GET /horta/ — Listagem de hortas associadas.
 POST /telemetria/ — Ponto de recepção dos dados do microcontrolador (Temperatura, Umidade e Luz).
 
 GET /telemetria/{horta_id} — Recuperação do histórico de dados mastigados para exibição gráfica.
+
+## 🔌 Como Rodar a Estação IoT (Hardware)
+
+1. Faça o upload do código `SensoresHorta.ino` (localizado em `IoT/Arduino/`) para o seu Arduino Uno usando a IDE do Arduino.
+2. Descubra qual porta **COM** o Arduino utilizou (ex: COM3, COM4).
+3. Abra o arquivo `IoT/Arduino/ponte_iot.py` e ajuste a variável `PORTA_SERIAL` com a sua porta COM.
+4. Com o Back-end rodando, ative o seu ambiente virtual e execute a ponte:
+   cd IoT/Arduino
+   python ponte_iot.py
+
