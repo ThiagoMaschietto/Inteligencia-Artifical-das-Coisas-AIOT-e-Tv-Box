@@ -22,7 +22,8 @@ class DadoHorta(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     data_hora: datetime = Field(default_factory=obter_hora_absoluta_brt, index=True)
     temperatura: float
-    umidade: float
+    umidade_ar: float
+    umidade_solo: int
     luz: float
 
     horta_id: int = Field(default=None, foreign_key="horta.id")
