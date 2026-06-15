@@ -53,22 +53,67 @@
             </div>
         </div>
 
-        <div class="w-80 bg-slate-200/80 shrink-0 p-4 rounded-2xl flex flex-col gap-3 shadow-sm">
+        <div class="w-80 bg-slate-200/80 shrink-0 p-4 rounded-2xl flex flex-col gap-4 max-h-[calc(100vh-120px)] overflow-y-auto shadow-sm">
             <h3 class="font-bold text-slate-700 text-sm tracking-wide px-1">🛠️ Ações Rápidas</h3>
             
             <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-300/40">
                 <h4 class="text-xs font-bold text-slate-700 mb-3 uppercase tracking-wider text-emerald-600">Novo Canteiro</h4>
-                <form id="novaHortaForm" class="space-y-3">
-                    <label class="font-bold text-slate-700 text-xs tracking-wide px-1">Nome</label>
+                <form id="novaHortaForm" class="space-y-2">
+                    <label class="font-bold text-slate-600 text-[11px] tracking-wide block">Nome da Horta</label>
                     <input type="text" id="nomeHorta" required placeholder="Ex: Horta da Cozinha"
-                        class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors">
+                        class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors">
                     
-                    <label class="font-bold text-slate-700 text-xs tracking-wide px-1">Descrição</label>
+                    <label class="font-bold text-slate-600 text-[11px] tracking-wide block">Descrição</label>
                     <input type="text" id="descricaoHorta" placeholder="Ex: Temperos / Hortaliças"
-                        class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors">
+                        class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors">
                     
-                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg text-xs transition-colors cursor-pointer text-center">
-                        ➕ Adicionar à Lista
+                    <label class="font-bold text-slate-600 text-[11px] tracking-wide block">Tipo de Cultivo</label>
+                    <select id="perfilHorta" required 
+                        class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors">
+                        <option value="">Carregando cultivos...</option>
+                    </select>
+                    
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 rounded-lg text-xs transition-colors cursor-pointer text-center mt-2">
+                        ➕ Adicionar Canteiro
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-xs border border-slate-300/40">
+                <h4 class="text-xs font-bold text-slate-700 mb-3 uppercase tracking-wider text-amber-600">Novo Perfil de Planta</h4>
+                <form id="novoPerfilForm" class="space-y-2">
+                    <label class="font-bold text-slate-600 text-[11px] tracking-wide block">Nome da Espécie</label>
+                    <input type="text" id="nomePerfil" required placeholder="Ex: Manjericão, Tomate"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500 focus:bg-white transition-colors">
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="font-bold text-slate-600 text-[10px] tracking-wide block">Temp. Mín (°C)</label>
+                            <input type="number" id="tempMin" required placeholder="15" step="0.1"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500 focus:bg-white transition-colors">
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-600 text-[10px] tracking-wide block">Temp. Máx (°C)</label>
+                            <input type="number" id="tempMax" required placeholder="35" step="0.1"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500 focus:bg-white transition-colors">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="font-bold text-slate-600 text-[10px] tracking-wide block">Umid. Solo Mín (%)</label>
+                            <input type="number" id="umidSoloMin" required placeholder="40"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500 focus:bg-white transition-colors">
+                        </div>
+                        <div>
+                            <label class="font-bold text-slate-600 text-[10px] tracking-wide block">Umid. Ar Mín (%)</label>
+                            <input type="number" id="umidArMin" required placeholder="30"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500 focus:bg-white transition-colors">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2 rounded-lg text-xs transition-colors cursor-pointer text-center mt-2">
+                        💾 Salvar Nova Planta
                     </button>
                 </form>
             </div>
@@ -84,9 +129,20 @@
                     <h3 id="modalTituloHorta" class="text-lg font-bold text-slate-800">Gráficos do Canteiro</h3>
                     <p class="text-xs text-slate-400">Histórico de telemetria das últimas leituras</p>
                 </div>
-                <button onclick="fecharModal()" class="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 p-2 rounded-xl transition-colors cursor-pointer text-sm font-bold">
-                    ✕ Fechar
-                </button>
+                
+                <div class="flex items-center gap-2">
+                    <button id="btnExportarCSV" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl transition-colors cursor-pointer text-xs font-semibold flex items-center gap-1">
+                        📥 Exportar CSV
+                    </button>
+                    <button onclick="fecharModal()" class="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 p-2 rounded-xl transition-colors cursor-pointer text-sm font-bold">
+                        ✕ Fechar
+                    </button>
+                </div>
+            </div>
+
+            <div id="bannerAlerta" class="hidden bg-red-50 border-2 border-red-400 text-red-900 p-4 rounded-xl flex items-center gap-3 font-semibold shadow-xs transition-all">
+                <span class="text-2xl animate-bounce">⚠️</span>
+                <div id="listaMensagensAlerta" class="text-xs space-y-1"></div>
             </div>
 
             <div class="relative w-full h-80">
@@ -106,16 +162,40 @@
             document.getElementById('nomeUsuario').innerText = `👤 ${usuario}`;
         }
 
+        async function carregarPerfisPlantas() {
+            const selectPerfil = document.getElementById('perfilHorta');
+            try {
+                const resposta = await fetch('http://127.0.0.1:8000/perfil/', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!resposta.ok) throw new Error('Erro ao buscar perfis');
+                const perfis = await resposta.json();
+
+                selectPerfil.innerHTML = '<option value="">Selecione a planta...</option>';
+                perfis.forEach(perfil => {
+                    const opt = document.createElement('option');
+                    opt.value = perfil.id;
+                    opt.innerText = perfil.nome;
+                    selectPerfil.appendChild(opt);
+                });
+
+            } catch (erro) {
+                console.error('Erro ao carregar perfis:', erro);
+            }
+        }
+
         async function carregarHortas() {
             try {
-                const resposta = await fetch('http://127.0.0.1:8000/horta/', {
+                const resHortas = await fetch('http://127.0.0.1:8000/horta/', {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 
-                if (!resposta.ok) throw new Error('Erro ao buscar hortas');
+                if (!resHortas.ok) throw new Error('Erro ao buscar hortas');
                 
-                const hortas = await resposta.json();
+                const hortas = await resHortas.json();
                 const container = document.getElementById('listaHortas');
                 document.getElementById('contadorHortas').innerText = hortas.length;
                 
@@ -139,7 +219,6 @@
                             </div>
                             <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
                                 <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Conectado</span>
-                                <span class="text-emerald-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">Ver Gráficos</span>
                             </div>
                         </div>
                     `;
@@ -154,14 +233,69 @@
             document.getElementById('modalTituloHorta').innerText = `🌿 ${hortaNome}`;
             document.getElementById('modalGrafico').classList.remove('hidden');
 
+            const banner = document.getElementById('bannerAlerta');
+            const listaAlertas = document.getElementById('listaMensagensAlerta');
+            banner.classList.add('hidden');
+            listaAlertas.innerHTML = '';
+
+            // 🆕 LÓGICA DE EXPORTAÇÃO CSV VINCULADA AO BOTÃO
+            const btnExportar = document.getElementById('btnExportarCSV');
+            // Remove ouvintes antigos clonando o elemento (evita downloads duplicados)
+            const novoBtnExportar = btnExportar.cloneNode(true);
+            btnExportar.parentNode.replaceChild(novoBtnExportar, btnExportar);
+
+            novoBtnExportar.addEventListener('click', async () => {
+                try {
+                    const resExportar = await fetch(`http://127.0.0.1:8000/telemetria/exportar/${hortaId}`, {
+                        method: 'GET',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    
+                    if (!resExportar.ok) throw new Error('Falha ao descarregar relatório.');
+                    
+                    // Transforma a resposta da API num link virtual de download temporário
+                    const blob = await resExportar.blob();
+                    const urlBlob = window.URL.createObjectURL(blob);
+                    const linkVirtual = document.createElement('a');
+                    linkVirtual.href = urlBlob;
+                    linkVirtual.download = `relatorio_${hortaNome.toLowerCase().replace(/\s+/g, '_')}.csv`;
+                    
+                    document.body.appendChild(linkVirtual);
+                    linkVirtual.click();
+                    linkVirtual.remove();
+                    window.URL.revokeObjectURL(urlBlob);
+                } catch (erro) {
+                    console.error(erro);
+                    alert('Erro ao exportar o ficheiro CSV.');
+                }
+            });
+
             try {
-                const resposta = await fetch(`http://127.0.0.1:8000/telemetria/${hortaId}?limite=10`, {
+                const respostaAtual = await fetch(`http://127.0.0.1:8000/telemetria/atual/${hortaId}`, {
                     method: 'GET',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
-                if (!resposta.ok) throw new Error('Erro ao buscar telemetria');
-                const dados = await resposta.json();
+                if (respostaAtual.ok) {
+                    const dadosAtuais = await respostaAtual.json();
+                    
+                    if (dadosAtuais.status === "ALERTA") {
+                        dadosAtuais.mensagens.forEach(msg => {
+                            const p = document.createElement('p');
+                            p.innerText = msg;
+                            listaAlertas.appendChild(p);
+                        });
+                        banner.classList.remove('hidden');
+                    }
+                }
+
+                const respostaHistorico = await fetch(`http://127.0.0.1:8000/telemetria/${hortaId}?limite=10`, {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!respostaHistorico.ok) throw new Error('Erro ao buscar telemetria');
+                const dados = await respostaHistorico.json();
 
                 const rotulos = dados.map(d => new Date(d.data_hora).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})).reverse();
                 const temperaturas = dados.map(d => d.temperatura).reverse();
@@ -177,43 +311,13 @@
                     data: {
                         labels: rotulos,
                         datasets: [
-                            {
-                                label: 'Temperatura (°C)',
-                                data: temperaturas,
-                                borderColor: '#ef4444',
-                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                tension: 0.3
-                            },
-                            {
-                                label: 'Luz',
-                                data: luz,
-                                borderColor: '#ba8e23',
-                                backgroundColor: 'rgba(255, 250, 205, 1.0)',
-                                tension: 0.3
-                            },
-                            {
-                                label: 'Umidade do Solo (%)',
-                                data: umidade_solo,
-                                borderColor: '#654321',
-                                backgroundColor: 'rgba(196, 164, 132, 1)',
-                                tension: 0.3
-                            },
-                            {
-                                label: 'Umidade do Ar',
-                                data: umidade_ar,
-                                borderColor: '#0ea5e9',
-                                backgroundColor: 'rgba(14, 165, 233, 0.1)',
-                                tension: 0.3
-                            }
+                            { label: 'Temperatura (°C)', data: temperaturas, borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)', tension: 0.3 },
+                            { label: 'Luz', data: luz, borderColor: '#ba8e23', backgroundColor: 'rgba(255, 250, 205, 0.2)', tension: 0.3 },
+                            { label: 'Umidade do Solo (%)', data: umidade_solo, borderColor: '#654321', backgroundColor: 'rgba(196, 164, 132, 0.2)', tension: 0.3 },
+                            { label: 'Umidade do Ar', data: umidade_ar, borderColor: '#0ea5e9', backgroundColor: 'rgba(14, 165, 233, 0.1)', tension: 0.3 }
                         ]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: { beginAtZero: true }
-                        }
-                    }
+                    options: { responsive: true, maintainAspectRatio: false }
                 });
 
             } catch (erro) {
@@ -225,12 +329,46 @@
             document.getElementById('modalGrafico').classList.add('hidden');
         }
 
-        // Criação de Horta (Sincronizado com o ID "descricaoHorta")
+        // Envio do Perfil de Planta
+        document.getElementById('novoPerfilForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                nome: document.getElementById('nomePerfil').value,
+                temp_min: parseFloat(document.getElementById('tempMin').value),
+                temp_max: parseFloat(document.getElementById('tempMax').value),
+                umidade_solo_min: parseInt(document.getElementById('umidSoloMin').value),
+                umidade_ar_min: parseInt(document.getElementById('umidArMin').value)
+            };
+
+            try {
+                const resposta = await fetch('http://127.0.0.1:8000/perfil/', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (resposta.ok) {
+                    alert('✨ Perfil cadastrado com sucesso!');
+                    document.getElementById('novoPerfilForm').reset();
+                    carregarPerfisPlantas(); 
+                } else {
+                    const erroData = await resposta.json();
+                    alert(`⚠️ Erro: ${erroData.detail}`);
+                }
+            } catch (erro) {
+                console.error('Erro ao salvar perfil:', erro);
+            }
+        });
+
+        // Criação de Horta
         document.getElementById('novaHortaForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nome = document.getElementById('nomeHorta').value;
-            // CORREÇÃO: Capturando o valor usando o ID correto que está no HTML
             const descricao = document.getElementById('descricaoHorta').value; 
+            const perfilId = document.getElementById('perfilHorta').value;
 
             try {
                 const resposta = await fetch('http://127.0.0.1:8000/horta/', {
@@ -239,7 +377,11 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ nome: nome, descricao: descricao }) 
+                    body: JSON.stringify({ 
+                        nome: nome, 
+                        descricao: descricao,
+                        perfil_id: perfilId ? parseInt(perfilId) : null 
+                    }) 
                 });
 
                 if (resposta.ok) {
@@ -257,6 +399,7 @@
         });
 
         carregarHortas();
+        carregarPerfisPlantas();
     </script>
 </body>
 </html>
