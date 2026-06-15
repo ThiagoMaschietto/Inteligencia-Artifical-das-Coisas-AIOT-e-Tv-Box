@@ -8,8 +8,9 @@ from app.database import engine
 from app.models.usuario import Usuario
 from app.models.horta import Horta
 from app.models.dado_horta import DadoHorta
+from app.models.perfil_plantas import PerfilPlanta
 
-from app.routers import auth, horta, telemetria
+from app.routers import auth, horta, telemetria, perfil
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,6 +28,7 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, 
 app.include_router(auth.router)
 app.include_router(horta.router)
 app.include_router(telemetria.router)
+app.include_router(perfil.router)
 
 @app.get("/")
 def home():

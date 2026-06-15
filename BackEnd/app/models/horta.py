@@ -1,8 +1,14 @@
-from sqlmodel import Field, SQLModel
+from typing import Optional
+from sqlmodel import Field, Relationship, SQLModel
 
 class Horta(SQLModel, table=True):
-    id: int | None = Field(default=None, primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
     nome: str
-    descricao: str
+    descricao: Optional[str] = None
+    
+    usuario_id: int = Field(foreign_key="usuario.id") 
+    
+    perfil_id: Optional[int] = Field(default=None, foreign_key="perfilplanta.id")
+    perfil: Optional["PerfilPlanta"] = Relationship(back_populates="hortas")
 
-    usuario_id: int = Field(default=None, foreign_key="usuario.id")
+from app.models.perfil_plantas import PerfilPlanta
