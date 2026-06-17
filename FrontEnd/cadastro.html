@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuerPlantar - Cadastro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-emerald-50 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white w-full max-w-md p-8 rounded-3xl shadow-xl border border-emerald-100">
+        <h1 class="text-2xl font-black text-emerald-800 text-center mb-1">🌿 Criar Conta</h1>
+        <p class="text-sm text-slate-400 text-center mb-8">Junte-se ao QuerPlantar hoje.</p>
+
+        <form id="cadastroForm" class="space-y-4">
+            <div>
+                <label class="text-xs font-bold text-slate-600 block mb-1">Usuário</label>
+                <input type="text" id="username" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+            <div>
+                <label class="text-xs font-bold text-slate-600 block mb-1">Senha</label>
+                <input type="password" id="password" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-all mt-4 cursor-pointer">
+                Registrar
+            </button>
+        </form>
+
+        <p class="text-xs text-center text-slate-500 mt-6">
+            Já tem uma conta? <a href="login.html" class="text-emerald-600 font-bold hover:underline">Entre agora</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('cadastroForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userData = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value 
+            };
+
+            const resposta = await fetch('http://127.0.0.1:8000/auth/cadastro', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            if (resposta.ok) {
+                alert('🎉 Cadastro realizado! Faça login agora.');
+                window.location.href = 'login.html';
+            } else {
+                const erro = await resposta.json();
+                alert(`⚠️ ${erro.detail}`); 
+            }
+        });
+    </script>
+</body>
+</html>
