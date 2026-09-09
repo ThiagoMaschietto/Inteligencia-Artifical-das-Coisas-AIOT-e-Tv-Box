@@ -39,19 +39,19 @@
         </div>
 
         <div class="w-80 bg-slate-200/80 shrink-0 p-4 rounded-2xl flex flex-col gap-3 max-h-[calc(100vh-120px)] shadow-sm">
-            <h3 class="font-bold text-slate-700 text-sm tracking-wide px-1">📢 Diagnóstico da IA</h3>
-            
-            <div class="flex flex-col gap-2 overflow-y-auto">
-                <div class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-300/40 border-l-4 border-l-amber-500">
-                    <p class="text-xs font-bold text-slate-700">Atenção na Irrigação</p>
-                    <p class="text-xs text-slate-500 mt-1">O solo do Canteiro Alfa caiu abaixo de 40% nas últimas 2 hours.</p>
-                </div>
-                <div class="bg-white p-3.5 rounded-xl shadow-xs border border-slate-300/40 border-l-4 border-l-emerald-500">
-                    <p class="text-xs font-bold text-slate-700">Luminosidade Ideal</p>
-                    <p class="text-xs text-slate-500 mt-1">Todas as hortas atingiram a cota de luz solar recomendada para hoje.</p>
-                </div>
-            </div>
-        </div>
+    
+    <div class="flex justify-between items-center px-1 mb-1">
+        <h3 class="font-bold text-slate-700 text-sm tracking-wide">📢 Diagnóstico da IA</h3>
+        <button onclick="abrirModalAnomalias()" class="text-[10px] bg-slate-300 hover:bg-emerald-500 hover:text-white text-slate-700 px-2 py-1 rounded-md transition-colors cursor-pointer font-bold shadow-sm">
+            Ver Histórico ➔
+        </button>
+    </div>
+    
+    <div id="listaAnomaliasIA" class="flex flex-col gap-3 overflow-y-auto pr-1 pb-4">
+        <p class="text-xs text-slate-400 text-center py-4 animate-pulse">Buscando diagnósticos Edge...</p>
+    </div>
+
+</div>
 
         <div class="w-80 bg-slate-200/80 shrink-0 p-4 rounded-2xl flex flex-col gap-4 max-h-[calc(100vh-120px)] overflow-y-auto shadow-sm">
             <h3 class="font-bold text-slate-700 text-sm tracking-wide px-1">🛠️ Ações Rápidas</h3>
@@ -151,7 +151,54 @@
         </div>
     </div>
 
+    <div id="modalAnomalias" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+        <div class="bg-white w-full max-w-4xl rounded-2xl p-6 shadow-2xl border border-slate-200 flex flex-col gap-4 max-h-[90vh]">
+        
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">🚨 Histórico Completo de Anomalias</h3>
+                    <p class="text-xs text-slate-400">Todos os alertas disparados pela Inteligência Artificial no Edge</p>
+                </div>
+                <button onclick="fecharModalAnomalias()" class="text-slate-400 hover:text-slate-600 bg-slate-100 hover:bg-slate-200 p-2 rounded-xl transition-colors cursor-pointer text-sm font-bold">
+                    ✕ Fechar
+                </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 rounded-xl border border-slate-200">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-600 text-[11px] uppercase tracking-wider sticky top-0 shadow-sm">
+                            <th class="p-3 font-bold">Data/Hora</th>
+                            <th class="p-3 font-bold">Canteiro</th>
+                            <th class="p-3 font-bold">Causa Raiz (SHAP)</th>
+                            <th class="p-3 font-bold">Leitura do Momento (T | U.Ar | U.Solo | Luz)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaAnomaliasCorpo" class="text-xs text-slate-700 divide-y divide-slate-100">
+                    </tbody>
+                </table>
+            </div>
+
+        <div class="flex justify-between items-center border-t border-slate-100 pt-3">
+            <button id="btnPaginaAnterior" onclick="mudarPaginaAnomalias(-1)" class="px-4 py-2 bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-700 rounded-lg text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
+                ⬅️ Anterior
+            </button>
+            <span id="infoPaginaAnomalias" class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                Página 1 de X
+            </span>
+            <button id="btnPaginaProxima" onclick="mudarPaginaAnomalias(1)" class="px-4 py-2 bg-slate-100 hover:bg-emerald-100 text-slate-600 hover:text-emerald-700 rounded-lg text-xs font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
+                Próxima ➡️
+            </button>
+        </div>
+
+    </div>
+</div>
+
     <script>
+                // Abaixo de "let hortaAbertaNome = "";"
+        let todasAnomaliasGlobais = [];
+        let paginaAtualAnomalias = 1;
+        const itensPorPaginaAnomalias = 7; // Quantos alertas aparecem por página
         const token = localStorage.getItem('access_token');
         const usuario = localStorage.getItem('usuario_logado');
         let graficoInstancia = null;
@@ -198,6 +245,8 @@
                 const hortas = await resHortas.json();
                 const container = document.getElementById('listaHortas');
                 document.getElementById('contadorHortas').innerText = hortas.length;
+
+                carregarAnomaliasIA(hortas);
                 
                 if (hortas.length === 0) {
                     container.innerHTML = `<p class="text-xs text-slate-400 text-center py-6">Nenhum canteiro por aqui ainda.</p>`;
@@ -228,6 +277,86 @@
                 document.getElementById('listaHortas').innerHTML = `<p class="text-xs text-red-500 text-center py-4">Erro ao carregar dados.</p>`;
             }
         }
+
+        async function carregarAnomaliasIA(hortas) {
+    const container = document.getElementById('listaAnomaliasIA');
+    let todasAnomalias = [];
+
+    try {
+        // 1. Busca APENAS as anomalias de cada horta direto da nova rota
+        for (const horta of hortas) {
+            const resposta = await fetch(`http://127.0.0.1:8000/telemetria/anomalias/${horta.id}?limite=100`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (resposta.ok) {
+                const anomalias = await resposta.json();
+                
+                // Anota o nome da horta dentro do dado para aparecer no card
+                anomalias.forEach(a => a.nome_horta = horta.nome);
+                
+                todasAnomalias.push(...anomalias);
+            }
+        }
+
+        // 2. Ordena tudo de forma cronológica (A mais recente no topo)
+        todasAnomalias.sort((a, b) => new Date(b.data_hora) - new Date(a.data_hora));
+
+        todasAnomaliasGlobais = todasAnomalias;
+
+        // Cenário: Nenhuma anomalia!
+        if (todasAnomalias.length === 0) {
+            container.innerHTML = `
+                <div class="bg-emerald-50 p-3.5 rounded-xl border border-emerald-200 border-l-4 border-l-emerald-500 shadow-sm">
+                    <p class="text-xs font-bold text-emerald-700">Tudo sob controle! 🌿</p>
+                    <p class="text-[10px] text-emerald-600 mt-1">A Inteligência Artificial não detectou nenhuma quebra de padrão recente.</p>
+                </div>`;
+            return;
+        }
+
+        // Limpa a mensagem de "Buscando..."
+        container.innerHTML = ''; 
+        
+        // Pega apenas as últimas 4 para não criar uma lista infinita na tela inicial
+        const ultimasAnomalias = todasAnomalias.slice(0, 4);
+
+        // 3. Desenha o Card de Alerta
+        ultimasAnomalias.forEach(anomalia => {
+            const dataObj = new Date(anomalia.data_hora);
+            const dataFormatada = dataObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const horaFormatada = dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+            container.innerHTML += `
+                <div class="bg-white p-3 rounded-xl shadow-xs border border-slate-200 border-l-4 border-l-red-500 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <span class="text-[10px] font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded-md truncate max-w-[120px]">
+                            ${anomalia.nome_horta}
+                        </span>
+                        <span class="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-md border border-slate-200">
+                            🗓️ ${dataFormatada} - ${horaFormatada}
+                        </span>
+                    </div>
+                    
+                    <p class="text-xs font-bold text-slate-800 flex items-center gap-1 mt-1.5">
+                        🔍 Causa: <span class="text-red-600 capitalize">${anomalia.causa_raiz}</span>
+                    </p>
+                    
+                    <div class="mt-2 grid grid-cols-2 gap-1 text-[9px] font-semibold text-slate-600 bg-slate-50 p-1.5 rounded-lg border border-slate-200/60">
+                        <p class="${anomalia.causa_raiz.includes('Temperatura') ? 'text-red-600 bg-red-100 px-1 rounded' : ''}">Temp: ${anomalia.temperatura}°C</p>
+                        <p class="${anomalia.causa_raiz.includes('Ar') ? 'text-red-600 bg-red-100 px-1 rounded' : ''}">Ar: ${anomalia.umidade_ar}%</p>
+                        <p class="${anomalia.causa_raiz.includes('Solo') ? 'text-red-600 bg-red-100 px-1 rounded' : ''}">Solo: ${anomalia.umidade_solo}%</p>
+                        <p class="${anomalia.causa_raiz.includes('Lumi') ? 'text-red-600 bg-red-100 px-1 rounded' : ''}">Luz: ${anomalia.luz}</p>
+                    </div>
+                </div>
+            `;
+        });
+
+    } catch (erro) { // <-- OLHA O CATCH AQUI! Era ele que estava faltando.
+        console.error("Erro ao carregar anomalias:", erro);
+        container.innerHTML = `<p class="text-xs text-red-500 text-center py-4 font-bold">⚠️ Erro ao comunicar com o Edge AI.</p>`;
+    }
+}
 
         async function abrirGrafico(hortaId, hortaNome) {
             document.getElementById('modalTituloHorta').innerText = `🌿 ${hortaNome}`;
@@ -400,6 +529,73 @@
 
         carregarHortas();
         carregarPerfisPlantas();
+
+        // ==========================================
+// LÓGICA DO MODAL DE ANOMALIAS PAGINADO
+// ==========================================
+function abrirModalAnomalias() {
+    paginaAtualAnomalias = 1; // Reseta para a página 1 ao abrir
+    renderizarTabelaAnomalias();
+    document.getElementById('modalAnomalias').classList.remove('hidden');
+}
+
+function fecharModalAnomalias() {
+    document.getElementById('modalAnomalias').classList.add('hidden');
+}
+
+function mudarPaginaAnomalias(direcao) {
+    paginaAtualAnomalias += direcao;
+    renderizarTabelaAnomalias();
+}
+
+function renderizarTabelaAnomalias() {
+    const tbody = document.getElementById('tabelaAnomaliasCorpo');
+    
+    // Cálculo matemático das páginas
+    const totalPaginas = Math.ceil(todasAnomaliasGlobais.length / itensPorPaginaAnomalias) || 1;
+    const inicio = (paginaAtualAnomalias - 1) * itensPorPaginaAnomalias;
+    const fim = inicio + itensPorPaginaAnomalias;
+    
+    // Corta exatamente os itens que pertencem a esta página
+    const itensPagina = todasAnomaliasGlobais.slice(inicio, fim);
+
+    tbody.innerHTML = ''; // Limpa a tabela
+
+    if (itensPagina.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-center p-6 text-slate-400 font-bold bg-slate-50">Nenhuma anomalia registada no sistema. 🌿</td></tr>';
+    } else {
+        itensPagina.forEach(anomalia => {
+            const dataObj = new Date(anomalia.data_hora);
+            const dataStr = dataObj.toLocaleDateString('pt-BR');
+            const horaStr = dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            
+            // Destaca de vermelho o sensor culpado
+            const tClass = anomalia.causa_raiz.includes('Temperatura') ? 'text-red-600 font-bold' : '';
+            const arClass = anomalia.causa_raiz.includes('Ar') ? 'text-red-600 font-bold' : '';
+            const soloClass = anomalia.causa_raiz.includes('Solo') ? 'text-red-600 font-bold' : '';
+            const luzClass = anomalia.causa_raiz.includes('Lumi') ? 'text-red-600 font-bold' : '';
+
+            tbody.innerHTML += `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="p-3 font-semibold whitespace-nowrap">${dataStr} <span class="text-slate-400 ml-1">${horaStr}</span></td>
+                    <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded text-[10px] font-bold">${anomalia.nome_horta}</span></td>
+                    <td class="p-3 text-red-600 font-bold capitalize">${anomalia.causa_raiz}</td>
+                    <td class="p-3 text-[11px] bg-slate-50/50">
+                        <span class="${tClass}">${anomalia.temperatura}°C</span> | 
+                        <span class="${arClass}">${anomalia.umidade_ar}%</span> | 
+                        <span class="${soloClass}">${anomalia.umidade_solo}%</span> | 
+                        <span class="${luzClass}">${anomalia.luz}</span>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // Atualiza os Textos e os Botões (Trava se estiver na 1ª ou na última página)
+    document.getElementById('infoPaginaAnomalias').innerText = `Página ${paginaAtualAnomalias} de ${totalPaginas}`;
+    document.getElementById('btnPaginaAnterior').disabled = (paginaAtualAnomalias === 1);
+    document.getElementById('btnPaginaProxima').disabled = (paginaAtualAnomalias === totalPaginas);
+}
     </script>
 </body>
 </html>
